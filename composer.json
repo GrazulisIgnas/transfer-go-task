@@ -1,8 +1,7 @@
 {
-    "name": "symfony/skeleton",
+    "name": "symfony/notification-service",
     "type": "project",
-    "license": "MIT",
-    "description": "A minimal Symfony project recommended to create bare bones applications",
+    "description": "Multichannel notification system",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
