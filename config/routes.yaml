@@ -1,3 +1,3 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
+notification_api:
+    resource: ../src/Controller/NotificationController.php
+    type: annotation

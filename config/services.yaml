@@ -4,6 +4,46 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    notification:
+        channels:
+            email:
+                enabled: true
+                providers:
+                    aws_ses:
+                        enabled: true
+                        priority: 1
+            sms:
+                enabled: true
+                providers:
+                    twilio:
+                        enabled: true
+                        priority: 1
+            push:
+                enabled: true
+                providers:
+                    pushy:
+                        enabled: true
+                        priority: 1
+
+        retry:
+            max_attempts: 3
+            delay_seconds: 300
+
+    notification.retry:
+        max_attempts: 3
+        delay_seconds: 300
+        
+    notification.channels.email.providers.aws_ses:
+        enabled: true
+        priority: 1
+    
+    notification.channels.sms.providers.twilio:
+        enabled: true
+        priority: 1
+    
+    notification.channels.push.providers.pushy:
+        enabled: true
+        priority: 1    
 
 services:
     # default configuration for services in *this* file
@@ -19,6 +59,39 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+    
+    App\NotificationPublisher\Infrastructure\Configuration\ProviderConfiguration:
+        arguments:
+            $config: '%notification%'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    # Application Services
+    App\NotificationPublisher\Application\Service\NotificationService:
+        arguments:
+            $logger: '@monolog.logger'
+
+    App\NotificationPublisher\Application\Service\FailoverManager:
+        arguments:
+            $logger: '@monolog.logger'
+        calls:
+            -   method: addProvider
+                arguments: [ '@App\NotificationPublisher\Infrastructure\Provider\Email\AwsSesProvider' ]
+            -   method: addProvider
+                arguments: [ '@App\NotificationPublisher\Infrastructure\Provider\Sms\TwilioProvider' ]
+            -   method: addProvider
+                arguments: [ '@App\NotificationPublisher\Infrastructure\Provider\Push\PushyProvider' ]
+
+    # Providers
+    App\NotificationPublisher\Infrastructure\Provider\Email\AwsSesProvider:
+        arguments:
+            $config: '%notification.channels.email.providers.aws_ses%'
+            $logger: '@monolog.logger'
+
+    App\NotificationPublisher\Infrastructure\Provider\Sms\TwilioProvider:
+        arguments:
+            $config: '%notification.channels.sms.providers.twilio%'
+            $logger: '@monolog.logger'
+
+    App\NotificationPublisher\Infrastructure\Provider\Push\PushyProvider:
+        arguments:
+            $config: '%notification.channels.push.providers.pushy%'
+            $logger: '@monolog.logger'
