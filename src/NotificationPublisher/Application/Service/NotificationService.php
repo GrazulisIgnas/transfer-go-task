@@ -65,9 +65,6 @@ class NotificationService
                     'provider' => $result['provider'],
                     'channel' => $notification->getChannel()->getValue(),
                 ]);
-
-                // Track usage
-                $this->usageTracker->track($notification, $result['provider'], true);
             } else {
                 $this->handleFailedNotification($notification, $result);
             }
@@ -98,9 +95,6 @@ class NotificationService
                 'error' => $result['result']->getErrorMessage(),
             ]);
         }
-
-        // Track failed usage
-        $this->usageTracker->track($notification, $result['provider'], false);
     }
 
     private function handleNotificationException(Notification $notification, \Throwable $exception): void
