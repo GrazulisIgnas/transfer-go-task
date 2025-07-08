@@ -4,11 +4,21 @@ declare(strict_types=1);
 
 namespace App\NotificationPublisher\Domain\ValueObject;
 
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Embeddable]
 class Message
 {
+    #[ORM\Column(type: 'string')]
     private string $subject;
+
+    #[ORM\Column(type: 'string')]
     private string $body;
+
+    #[ORM\Column(type: 'json')]
     private array $templateVariables = [];
+
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $templateId = null;
 
     public function __construct(

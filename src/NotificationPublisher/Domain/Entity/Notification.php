@@ -11,21 +11,50 @@ use App\NotificationPublisher\Domain\ValueObject\Recipient;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Entity]
+#[ORM\Table(name: 'notifications')]
 class Notification
 {
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 36)]
     private string $id;
+
+    #[ORM\Column(type: 'string', length: 255)]
     private string $userId;
+
+    #[ORM\Embedded(class: Recipient::class)]
     private Recipient $recipient;
+
+    #[ORM\Embedded(class: Message::class)]
     private Message $message;
+
+    #[ORM\Column(type: 'notification_channel')]
     private NotificationChannel $channel;
+
+    #[ORM\Column(type: 'notification_status')]
     private NotificationStatus $status;
+
+    #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $sentAt = null;
+
+    #[ORM\Column(type: 'integer')]
     private int $maxRetries;
+
+    #[ORM\Column(type: 'integer')]
     private int $currentRetries = 0;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $scheduledAt = null;
+
+    #[ORM\Column(type: 'json')]
     private array $metadata = [];
+
+    #[ORM\OneToMany(mappedBy: 'notification', targetEntity: NotificationAttempt::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $attempts;
 
     public function __construct(
