@@ -47,7 +47,7 @@ class NotificationService
             // Create an attempt record
             $attempt = new NotificationAttempt(
                 Uuid::uuid4()->toString(),
-                $notification->getId(),
+                $notification,
                 $result['provider'],
                 $result['result']->isSuccessful(),
                 $result['result']->getErrorMessage(),

@@ -9,6 +9,7 @@ use App\NotificationPublisher\Domain\Service\NotificationResult;
 use App\NotificationPublisher\Domain\ValueObject\Message;
 use App\NotificationPublisher\Domain\ValueObject\NotificationChannel;
 use App\NotificationPublisher\Domain\ValueObject\Recipient;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Psr\Log\LoggerInterface;
 use Aws\Ses\SesClient;
@@ -29,14 +30,22 @@ class AwsSesProvider implements NotificationProviderInterface
         $this->logger = $logger;
         $this->enabled = $config['enabled'] ?? true;
 
-        $this->ses = new SesClient([
-            'version' => $config['version'] ?? 'latest',
-            'region'  => $config['region'],
-            'credentials' => [
-                'key'    => $config['access_key_id'],
-                'secret' => $config['secret_access_key'],
-            ],
-        ]);
+        try {
+            $this->ses = new SesClient([
+                'version' => $config['version'] ?? 'latest',
+                'region' => $config['region'],
+                'credentials' => [
+                    'key' => $config['access_key_id'],
+                    'secret' => $config['secret_access_key'],
+                ],
+            ]);
+        } catch (Exception $exception) {
+            $this->logger->error('AWS SES init error', [
+                'message' => $exception->getMessage()
+            ]);
+
+            return NotificationResult::failure($exception->getMessage(), $exception->getCode());
+        }
     }
 
     public function getName(): string
@@ -74,7 +83,8 @@ class AwsSesProvider implements NotificationProviderInterface
                 'Source' => $this->config['from'],
             ]);
 
-            if ($result->get('code') === Response::HTTP_OK) {
+            $metaData = $result->get('@metadata');
+            if (isset($metaData['statusCode']) && $metaData['statusCode'] === Response::HTTP_OK) {
                 return NotificationResult::success('Email sent successfully via AWS SES');
             } else {
                 return NotificationResult::failure('AWS SES API error', Response::HTTP_INTERNAL_SERVER_ERROR);
