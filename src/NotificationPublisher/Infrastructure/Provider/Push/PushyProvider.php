@@ -9,6 +9,8 @@ use App\NotificationPublisher\Domain\Service\NotificationResult;
 use App\NotificationPublisher\Domain\ValueObject\Message;
 use App\NotificationPublisher\Domain\ValueObject\NotificationChannel;
 use App\NotificationPublisher\Domain\ValueObject\Recipient;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 
 class PushyProvider implements NotificationProviderInterface
@@ -36,29 +38,43 @@ class PushyProvider implements NotificationProviderInterface
 
     public function send(Recipient $recipient, Message $message): NotificationResult
     {
+        if (!$recipient->hasPushToken()) {
+            return NotificationResult::failure('Recipient has no push token');
+        }
+
+        $payload = [
+            'to' => $recipient->getPushToken(),
+            'data' => [
+                'title' => $message->getSubject(),
+            ],
+            'notification' => [
+                'title' => $message->getSubject(),
+                'body' => $message->getBody(),
+            ],
+        ];
+
         try {
-            if (!$recipient->hasPushToken()) {
-                return NotificationResult::failure('Recipient has no push token');
-            }
-
-            $this->logger->info('Sending push notification via Pushy', [
-                'token' => substr($recipient->getPushToken(), 0, 10) . '...',
-                'subject' => $message->getSubject(),
+            $client = new Client([
+                'base_uri' => 'https://api.pushy.me',
+                'timeout' => 5.0,
             ]);
 
-            // TODO: Implement actual Pushy integration
-            if ($this->simulateApiCall()) {
-                return NotificationResult::success('Push notification sent successfully via Pushy');
-            } else {
-                return NotificationResult::failure('Pushy API error', 502);
-            }
-
-        } catch (\Throwable $exception) {
-            $this->logger->error('Pushy provider error', [
-                'exception' => $exception->getMessage(),
+            $response = $client->post('/push?api_key=' . $this->config['api_key'], [
+                'json' => $payload,
             ]);
 
-            return NotificationResult::failure($exception->getMessage());
+            $this->logger->info('Push sent via Pushy', [
+                'status' => $response->getStatusCode(),
+            ]);
+
+            return NotificationResult::success('Push sent via Pushy');
+        } catch (RequestException $e) {
+            $this->logger->error('Pushy error', [
+                'error' => $e->getMessage(),
+                'response' => $e->getResponse()?->getBody()?->getContents(),
+            ]);
+
+            return NotificationResult::failure('Pushy request failed: ' . $e->getMessage(), 502);
         }
     }
 

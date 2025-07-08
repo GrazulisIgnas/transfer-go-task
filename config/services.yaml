@@ -47,7 +47,8 @@ parameters:
     
     notification.channels.push.providers.pushy:
         enabled: true
-        priority: 1    
+        priority: 1
+        api_key: '%env(PUSHY_API_KEY)%'
 
 services:
     # default configuration for services in *this* file
