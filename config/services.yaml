@@ -36,6 +36,10 @@ parameters:
     notification.channels.email.providers.aws_ses:
         enabled: true
         priority: 1
+        region: '%env(AWS_DEFAULT_REGION)%'
+        access_key_id: '%env(AWS_ACCESS_KEY_ID)%'
+        secret_access_key: '%env(AWS_SECRET_ACCESS_KEY)%'
+        from: '%env(AWS_SENDER_EMAIL)%'
     
     notification.channels.sms.providers.twilio:
         enabled: true
