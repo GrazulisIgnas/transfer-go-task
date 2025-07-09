@@ -21,18 +21,28 @@ cp .env.example .env.local
 
 Set your provider credentials and other configurations. Read [Providers Documentation](./docs/providers.md) for detailed setup instructions for each provider.
 
-### 2. Docker Setup
+### 2. Install Dependencies
+
+```bash 
+docker compose exec php composer install
+```
+
+### 3. Docker Setup
 
 ```bash
 docker compose build --pull --no-cache
 docker compose up -d
 ```
 
-### 3. Database Setup
+### 4. Database Setup
 
 ```bash
 docker compose exec php bin/console doctrine:migrations:migrate
 ```
+
+### 5. Configure Providers
+
+Open the [config/packages/parameters.yaml](./config/packages/parameters.yaml) file and configure your providers.
 
 ## Testing
 

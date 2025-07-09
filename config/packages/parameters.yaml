@@ -1,0 +1,50 @@
+parameters:
+    notification:
+        channels:
+            email:
+                enabled: true
+                providers:
+                    aws_ses:
+                        enabled: true
+                        priority: 1
+            sms:
+                enabled: true
+                providers:
+                    twilio:
+                        enabled: true
+                        priority: 1
+            push:
+                enabled: true
+                providers:
+                    pushy:
+                        enabled: true
+                        priority: 1
+        
+        retry:
+            max_attempts: 3
+            delay_seconds: 300
+            
+    retry:
+        max_attempts: 3
+        delay_seconds: 300
+
+    notification.retry:
+        max_attempts: 3
+        delay_seconds: 300
+        
+    notification.channels.email.providers.aws_ses:
+        enabled: true
+        priority: 1
+        region: '%env(AWS_DEFAULT_REGION)%'
+        access_key_id: '%env(AWS_ACCESS_KEY_ID)%'
+        secret_access_key: '%env(AWS_SECRET_ACCESS_KEY)%'
+        from: '%env(AWS_SENDER_EMAIL)%'
+    
+    notification.channels.sms.providers.twilio:
+        enabled: true
+        priority: 1
+    
+    notification.channels.push.providers.pushy:
+        enabled: true
+        priority: 1
+        api_key: '%env(PUSHY_API_KEY)%'
