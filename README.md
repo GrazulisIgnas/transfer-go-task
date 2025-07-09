@@ -40,9 +40,14 @@ docker compose up -d
 docker compose exec php bin/console doctrine:migrations:migrate
 ```
 
-### 5. Configure Providers
+### 5. Configure
 
-Open the [config/packages/parameters.yaml](./config/packages/parameters.yaml) file and configure your providers.
+1. Open the [config/packages/parameters.yaml](./config/packages/parameters.yaml) file and configure your providers.
+2. Run the following command to retry failed notifications:
+
+```bash
+docker-compose exec php php bin/console app:process-failed-notifications
+```
 
 ## Testing
 

@@ -56,7 +56,6 @@ class NotificationRepository implements NotificationRepositoryInterface
             ->select('n')
             ->from(Notification::class, 'n')
             ->where('n.status = :failed')
-            ->orderBy('n.updatedAt', 'ASC')
             ->setParameter('failed', NotificationStatus::FAILED)
             ->setMaxResults($limit)
             ->getQuery()

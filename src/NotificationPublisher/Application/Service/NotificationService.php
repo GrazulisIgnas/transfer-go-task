@@ -66,10 +66,12 @@ class NotificationService
                     'channel' => $notification->getChannel()->getValue(),
                 ]);
             } else {
+                $notification->markAsFailed();
                 $this->handleFailedNotification($notification, $result);
             }
 
         } catch (\Throwable $exception) {
+            $notification->markAsFailed();
             $this->handleNotificationException($notification, $exception);
         }
 
