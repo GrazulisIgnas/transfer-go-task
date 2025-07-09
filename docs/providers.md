@@ -1,5 +1,75 @@
 # Notification Providers Documentation
 
+## AWS SES Provider
+
+### Initial Setup
+
+1. AWS Account Setup
+    - Create an AWS account if you don't have one
+    - Navigate to AWS SES (Simple Email Service)
+    - Verify your email domain or at least one email address
+    - Create IAM user with SES permissions
+    - Get your credentials:
+        - Access Key ID
+        - Secret Access Key
+
+2. Configure Environment Variables
+   Add these to your `.env` file:
+   ```
+   AWS_ACCESS_KEY_ID=your_access_key_id
+   AWS_SECRET_ACCESS_KEY=your_secret_access_key
+   AWS_DEFAULT_REGION=eu-north-1
+   AWS_SENDER_EMAIL=your_verified_email@example.com
+   ```
+
+### Testing Email Sending
+
+1. Basic Requirements
+    - Verified sender email in AWS SES
+    - Proper IAM permissions configured
+    - Environment variables set in `.env`
+
+2. Run the Test
+   ```bash
+   docker compose exec php vendor/bin/phpunit tests/Unit/NotificationPublisher/Infrastructure/Provider/Email/AwsSesProviderTest.php
+   ```
+
+### Debugging Tests
+
+1. IDE Setup (same as Pushy setup)
+    - Configure PHP server in your IDE
+    - Server name: `be-evaluation-task`
+    - Set up path mappings
+
+2. Run Test with Debug
+   ```bash
+   docker compose exec -e XDEBUG_TRIGGER=1 -e PHP_IDE_CONFIG="serverName=be-evaluation-task" php ./vendor/bin/phpunit tests/Unit/NotificationPublisher/Infrastructure/Provider/Email/AwsSesProviderTest.php
+   ```
+
+### Troubleshooting
+
+1. Email Verification
+    - Ensure sender email is verified in AWS SES
+    - In sandbox mode, recipient emails also need verification
+    - Check AWS SES console for verification status
+
+2. IAM Permissions
+    - Verify IAM user has `ses:SendEmail` and `ses:SendRawEmail` permissions
+    - Check AWS credentials are correct in `.env`
+
+3. Environment Variables
+    - After updating `.env`, restart Docker:
+      ```bash
+      docker compose down
+      docker compose up -d
+      ```
+
+4. Common Errors
+    - "Email address not verified" - Verify email in AWS SES
+    - "Invalid credentials" - Check AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+    - "Region error" - Verify AWS_DEFAULT_REGION matches your SES region
+
+
 ## PUSHY Provider
 
 ### Initial Setup
@@ -12,7 +82,7 @@
      - APP ID
 
 2. Configure Environment Variables
-   Add these to your `.env.local` file:
+   Add these to your `.env` file:
    ```
    PUSHY_API_KEY=your_api_key
    PUSHY_APP_ID=your_app_id
@@ -30,7 +100,7 @@
    - Note: SSL-related errors may appear if Docker is running with HTTPS enabled
 
 3. Save Device Token
-   Add it to your `.env.local` file:
+   Add it to your `.env` file:
    ```
    PUSHY_DEVICE_TOKEN=your_device_token
    ```
@@ -58,7 +128,7 @@ docker compose exec php vendor/bin/phpunit tests/Unit/NotificationPublisher/Infr
 ### Troubleshooting
 
 1. Environment Variables
-   - After changing `.env.local`, restart Docker containers:
+   - After changing `.env`, restart Docker containers:
      ```bash
      docker compose down
      docker compose up -d
