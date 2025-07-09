@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pushy Token Generator</title>
+    <script src="https://sdk.pushy.me/web/1.0.8/pushy-sdk.js"></script>
+</head>
+<body>
+    <h2>Pushy Token Generator</h2>
+    <div id="token"></div>
+    <script>
+        // Register device for push notifications using the App ID from environment
+        Pushy.register({ appId: '{{ appId }}' })
+            .then(function (deviceToken) {
+                // Display token
+                document.getElementById('token').innerHTML = 'Device token: ' + deviceToken;
+                console.log('Pushy device token:', deviceToken);
+            })
+            .catch(function (err) {
+                // Handle registration errors
+                console.error('Registration failed:', err);
+            });
+    </script>
+</body>
+</html>
+

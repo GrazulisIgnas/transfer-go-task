@@ -1,3 +1,7 @@
 notification_api:
     resource: ../src/Controller/NotificationController.php
     type: annotation
+
+pushy_test:
+    resource: ../src/Controller/PushyTestController.php
+    type: annotation
