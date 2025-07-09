@@ -37,7 +37,7 @@
 ### Debugging Tests
 
 1. IDE Setup (same as Pushy setup)
-    - Configure PHP server in your IDE
+    - Configure a PHP server in your IDE
     - Server name: `be-evaluation-task`
     - Set up path mappings
 

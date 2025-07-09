@@ -16,8 +16,10 @@ The Notification Service is a robust, multichannel notification system built wit
 Copy the environment file and configure your providers:
 
 ```bash
-cp .env .env.local
+cp .env.example .env.local
 ```
+
+Set your provider credentials and other configurations. Read [Providers Documentation](./docs/providers.md) for detailed setup instructions for each provider.
 
 ### 2. Docker Setup
 
@@ -30,6 +32,39 @@ docker compose up -d
 
 ```bash
 docker compose exec php bin/console doctrine:migrations:migrate
+```
+
+## Testing
+
+### Run Unit Tests
+
+```bash
+docker compose exec php vendor/bin/phpunit tests/Unit
+```
+
+### Run Functional Tests
+
+```bash
+docker compose exec php vendor/bin/phpunit tests/Functional
+```
+
+### Manual Testing
+
+```bash
+curl -X POST https://localhost/api/notifications/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "test-user",
+    "recipient": {
+      "email": "test@example.com",
+      "push_token": "test"
+    },
+    "message": {
+      "subject": "Test",
+      "body": "This is a test message"
+    },
+    "channels": ["email", "push"]
+  }'
 ```
 
 ## Credits
