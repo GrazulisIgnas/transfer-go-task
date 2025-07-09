@@ -12,6 +12,8 @@ use App\NotificationPublisher\Domain\ValueObject\Recipient;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class PushyProvider implements NotificationProviderInterface
 {
@@ -46,9 +48,6 @@ class PushyProvider implements NotificationProviderInterface
             'to' => $recipient->getPushToken(),
             'data' => [
                 'title' => $message->getSubject(),
-            ],
-            'notification' => [
-                'title' => $message->getSubject(),
                 'body' => $message->getBody(),
             ],
         ];
@@ -64,17 +63,27 @@ class PushyProvider implements NotificationProviderInterface
             ]);
 
             $this->logger->info('Push sent via Pushy', [
-                'status' => $response->getStatusCode(),
+                'response' => $response,
             ]);
 
-            return NotificationResult::success('Push sent via Pushy');
-        } catch (RequestException $e) {
+            if ($response->getStatusCode() === Response::HTTP_OK) {
+                return NotificationResult::success('Push notification sent via Pushy');
+            } else {
+                return NotificationResult::failure('Failed to push notification via Pushy', Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        } catch (RequestException $exception) {
             $this->logger->error('Pushy error', [
-                'error' => $e->getMessage(),
-                'response' => $e->getResponse()?->getBody()?->getContents(),
+                'error' => $exception->getMessage(),
+                'response' => $exception->getResponse()?->getBody()?->getContents(),
             ]);
 
-            return NotificationResult::failure('Pushy request failed: ' . $e->getMessage(), 502);
+            return NotificationResult::failure('Pushy request failed: ' . $exception->getMessage(), 502);
+        } catch (Throwable $exception) {
+            $this->logger->error('Pushy provider error', [
+                'exception' => $exception->getMessage(),
+            ]);
+
+            return NotificationResult::failure($exception->getMessage());
         }
     }
 
